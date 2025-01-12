@@ -19,6 +19,6 @@ public class ReinosoApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         RobotFluxGenerator robotFluxGenerator = new RobotFluxGenerator();
         robotFluxGenerator.generateRobotFlux()
-                          .subscribe(robot -> logger.info("Generado: " + robot));
+                          .subscribe(robot -> logger.info("Generated: " + robot));
     }
 }

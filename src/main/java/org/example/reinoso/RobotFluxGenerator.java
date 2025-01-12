@@ -11,11 +11,11 @@ public class RobotFluxGenerator {
 
     private static final Logger logger = LoggerFactory.getLogger(RobotFluxGenerator.class);
 
-    public Flux<String> generateRobotFlux() {
+    public Flux<Robot> generateRobotFlux() {
         AtomicInteger robotCounter = new AtomicInteger(1);
 
         return Flux.interval(Duration.ofSeconds(1))
                    .filter(tick -> tick % 5 == 0)
-                   .map(tick -> "Robot " + robotCounter.getAndIncrement());
+                   .map(tick -> new Robot(robotCounter.getAndIncrement()));
     }
 }
