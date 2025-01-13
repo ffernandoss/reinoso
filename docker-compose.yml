@@ -1,17 +1,33 @@
 version: '3.8'
 services:
   zookeeper:
+# aqui creamos la imagen del coordinador del zookeeper para crearlo en el docker,
+# y se le asigna el puerto 2181 para la comunicacion con el kafka
     image: wurstmeister/zookeeper:latest
     ports:
       - "2181:2181"
+# se crea la imagen del kafka para crear el contenedor en el docker
+# se le asigna el puerto 9092 para la comunicacion con el zookeeper
   kafka:
     image: wurstmeister/kafka:latest
     ports:
       - "9092:9092"
+
     environment:
+# se configuran 2 listeners, uno para que se puedan escuchar comunicaciones a traves de localhost
+# y otro por si por ejemplo ambos se encuentran en el mismo docker (es decir la misma red interna) en este caso ambas imagenes se almacenan dentro del mismo contenedor (reinoso)
+
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:9092
+# esto, lo hemos visto en clase, que es que escuchará independientemente de la direccion ip, mientras vaya dirigido al puerto 9092 o 9093
+
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_INTERNAL://0.0.0.0:9093
+# aqui lo que se hace es que kafka se conecte al zookeeper mediante el puerto 2181
+
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+# aqui lo que se hace es asignar un protocolo de seguridad entre la comunicacion de kafka con zookeeper
+# en este caso se le ha asignado el protocolo de plano texto, por lo que no es una comunicacion cifrada
+
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+# en esta linea lo que hacemos es, primero asignar la direccion del host, y depues crear dentro de esa direccion, la direccion del contenedor
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
