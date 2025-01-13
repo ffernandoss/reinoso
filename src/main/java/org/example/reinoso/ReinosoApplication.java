@@ -15,13 +15,17 @@ public class ReinosoApplication implements CommandLineRunner {
     @Autowired
     private RobotFluxGenerator robotFluxGenerator;
 
+    @Autowired
+    private Menu menu;
+
     public static void main(String[] args) {
         SpringApplication.run(ReinosoApplication.class, args);
     }
 
     @Override
     public void run(String... args) throws Exception {
+        new Thread(menu).start();
         robotFluxGenerator.generateRobotFlux()
-                          .subscribe(robot -> logger.info("Generated: " + robot));
+                .subscribe(robot -> logger.info("Generated: " + robot));
     }
 }
