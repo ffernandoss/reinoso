@@ -57,8 +57,26 @@
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
+            cursor: pointer;
+        }
+        .robot-details {
+            display: none;
+            margin-top: 5px;
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
         }
     </style>
+    <script>
+        function toggleDetails(id) {
+            var details = document.getElementById(id);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -80,7 +98,12 @@
 
         <div th:if="${robots}">
             <ul>
-                <li th:each="robot : ${robots}" th:text="${robot}"></li>
+                <li th:each="robot : ${robots}" th:onclick="'toggleDetails(' + ${robot.id} + ')'">
+                    Robot <span th:text="${robot.id}"></span>
+                    <div th:id="${robot.id}" class="robot-details">
+                        <p th:text="'ID: ' + ${robot.id} + ', Category: ' + ${robot.category}"></p>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>
