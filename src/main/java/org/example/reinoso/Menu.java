@@ -98,9 +98,9 @@ public class Menu implements Runnable {
             Process process = processBuilder.start();
             int exitCode = process.waitFor();
             if (exitCode == 0) {
-                System.out.println("docker-compose down executed successfully.");
+                System.out.println("docker-compose down ha sido ejecutado correctamente");
             } else {
-                System.out.println("Failed to execute docker-compose down.");
+                System.out.println("error al ejecutar docker-compose down");
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
