@@ -24,6 +24,9 @@ public class Menu implements Runnable {
     @Autowired
     private ApplicationContext context;
 
+    @Autowired
+    private RobotFluxGenerator robotFluxGenerator;
+
     public Menu() {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
@@ -62,6 +65,7 @@ public class Menu implements Runnable {
                     break;
                 case 5:
                     System.out.println("Saliendo...");
+                    robotFluxGenerator.stop();
                     executeDockerComposeDown();
                     consumer.close();
                     SpringApplication.exit(context, () -> 0);
