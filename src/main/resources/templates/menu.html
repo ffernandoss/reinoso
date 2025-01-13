@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-top: 50px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        select, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .message {
+            text-align: center;
+            color: #ff0000;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #e9ecef;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Robot Menu</h1>
+        <form action="#" th:action="@{/menu}" method="post">
+            <select name="option">
+                <option value="1">Cortar</option>
+                <option value="2">Doblar</option>
+                <option value="3">Apilar</option>
+                <option value="4">Transportar</option>
+                <option value="5">Salir</option>
+            </select>
+            <button type="submit">Submit</button>
+        </form>
+
+        <div th:if="${noRobotsMessage}" class="message">
+            <p th:text="${noRobotsMessage}"></p>
+        </div>
+
+        <div th:if="${robots}">
+            <ul>
+                <li th:each="robot : ${robots}" th:text="${robot}"></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
