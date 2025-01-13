@@ -10,27 +10,27 @@ public class RobotTaskConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(RobotTaskConsumer.class);
 
-    @KafkaListener(topics = "robot-tasks-cutting", groupId = "robot-group")
-    public void processCuttingTask(Robot robot) {
-        logger.info("Processing cutting task for: " + robot);
+    @KafkaListener(topics = "robot-tasks-cortar", groupId = "robot-group")
+    public void processCortarTask(Robot robot) {
+        logger.info("Procesando tarea de cortar para: " + robot);
         // Lógica específica para cortar
     }
 
-    @KafkaListener(topics = "robot-tasks-folding", groupId = "robot-group")
-    public void processFoldingTask(Robot robot) {
-        logger.info("Processing folding task for: " + robot);
+    @KafkaListener(topics = "robot-tasks-doblar", groupId = "robot-group")
+    public void processDoblarTask(Robot robot) {
+        logger.info("Procesando tarea de doblar para: " + robot);
         // Lógica específica para doblar
     }
 
-    @KafkaListener(topics = "robot-tasks-stacking", groupId = "robot-group")
-    public void processStackingTask(Robot robot) {
-        logger.info("Processing stacking task for: " + robot);
+    @KafkaListener(topics = "robot-tasks-apilar", groupId = "robot-group")
+    public void processApilarTask(Robot robot) {
+        logger.info("Procesando tarea de apilar para: " + robot);
         // Lógica específica para apilar
     }
 
-    @KafkaListener(topics = "robot-tasks-transporting", groupId = "robot-group")
-    public void processTransportingTask(Robot robot) {
-        logger.info("Processing transporting task for: " + robot);
+    @KafkaListener(topics = "robot-tasks-transportar", groupId = "robot-group")
+    public void processTransportarTask(Robot robot) {
+        logger.info("Procesando tarea de transportar para: " + robot);
         // Lógica específica para transportar
     }
 }

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 
-import java.awt.*;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -14,7 +13,7 @@ public class RobotFluxGenerator {
     @Autowired
     private RobotService robotService;
 
-    private static final String[] TASK_CATEGORIES = {"cutting", "folding", "stacking", "transporting"};
+    private static final String[] TASK_CATEGORIES = {"cortar", "doblar", "apilar", "transportar"};
 
     public Flux<Robot> generateRobotFlux() {
         AtomicInteger robotCounter = new AtomicInteger(1);
