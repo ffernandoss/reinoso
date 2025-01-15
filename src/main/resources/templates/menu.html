@@ -9,39 +9,36 @@
             color: #333;
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
         }
         .container {
-            width: 80%;
-            margin: 0 auto;
+            width: 100%;
             padding: 20px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            margin-top: 50px;
-        }
-        h1 {
             text-align: center;
-            color: #007bff;
-        }
-        form {
-            display: flex;
-            justify-content: center;
             margin-bottom: 20px;
         }
-        select, button {
-            padding: 10px;
-            margin: 5px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
+        .sections {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
         }
-        button {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            cursor: pointer;
+        .robot-section {
+            width: 23%;
+            padding: 20px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
-        button:hover {
-            background-color: #0056b3;
+        .robot-section h2 {
+            color: #007bff;
         }
         .message {
             text-align: center;
@@ -53,7 +50,7 @@
             padding: 0;
         }
         li {
-            background-color: #e9ecef;
+            background-color: #f1f1f1;
             margin: 5px 0;
             padding: 10px;
             border-radius: 5px;
@@ -66,6 +63,15 @@
             background-color: #f1f1f1;
             border-radius: 5px;
         }
+        .refresh-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
     </style>
     <script>
         function toggleDetails(id) {
@@ -76,12 +82,107 @@
                 details.style.display = "none";
             }
         }
+
+        function refreshSection(category) {
+            let option;
+            switch (category) {
+                case 'cortar':
+                    option = 1;
+                    break;
+                case 'doblar':
+                    option = 2;
+                    break;
+                case 'apilar':
+                    option = 3;
+                    break;
+                case 'transportar':
+                    option = 4;
+                    break;
+                default:
+                    return;
+            }
+
+            fetch('/menu?option=' + option, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        updateRobotSection(data.category, data.robots);
+                    } else if (data.noRobotsMessage) {
+                        alert(data.noRobotsMessage);
+                    }
+                });
+        }
+
+        function updateRobotSection(category, robots) {
+            var section = document.getElementById('section-' + category);
+            var list = section.querySelector('ul');
+            var message = section.querySelector('.message');
+            list.innerHTML = '';
+            if (robots.length === 0) {
+                message.style.display = 'block';
+            } else {
+                message.style.display = 'none';
+                robots.forEach(function(robot) {
+                    var listItem = document.createElement('li');
+                    listItem.textContent = 'Robot ' + robot.id;
+                    listItem.onclick = function() { toggleDetails('details-' + robot.id); };
+
+                    var details = document.createElement('div');
+                    details.className = 'robot-details';
+                    details.id = 'details-' + robot.id;
+                    details.textContent = 'ID: ' + robot.id + ', Category: ' + robot.category;
+
+                    listItem.appendChild(details);
+                    list.appendChild(listItem);
+                });
+            }
+        }
+
+        function addRobotSection(category, robots) {
+            var section = document.createElement('div');
+            section.className = 'robot-section';
+            section.id = 'section-' + category;
+
+            var title = document.createElement('h2');
+            title.textContent = 'Robots for ' + category;
+            section.appendChild(title);
+
+            var refreshButton = document.createElement('button');
+            refreshButton.className = 'refresh-button';
+            refreshButton.textContent = 'Refresh';
+            refreshButton.onclick = function() { refreshSection(category); };
+            section.appendChild(refreshButton);
+
+            var message = document.createElement('div');
+            message.className = 'message';
+            message.textContent = 'No hay robots almacenados';
+            section.appendChild(message);
+
+            var list = document.createElement('ul');
+            section.appendChild(list);
+
+            document.querySelector('.sections').appendChild(section);
+
+            updateRobotSection(category, robots);
+        }
+
+        function handleMenuOption(option) {
+            fetch('/menu?option=' + option, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        addRobotSection(data.category, data.robots);
+                    } else if (data.noRobotsMessage) {
+                        alert(data.noRobotsMessage);
+                    }
+                });
+        }
     </script>
 </head>
 <body>
     <div class="container">
         <h1>Robot Menu</h1>
-        <form action="#" th:action="@{/menu}" method="post">
+        <form onsubmit="event.preventDefault(); handleMenuOption(document.querySelector('select').value);">
             <select name="option">
                 <option value="1">Cortar</option>
                 <option value="2">Doblar</option>
@@ -91,21 +192,7 @@
             </select>
             <button type="submit">Submit</button>
         </form>
-
-        <div th:if="${noRobotsMessage}" class="message">
-            <p th:text="${noRobotsMessage}"></p>
-        </div>
-
-        <div th:if="${robots}">
-            <ul>
-                <li th:each="robot : ${robots}" th:onclick="'toggleDetails(' + ${robot.id} + ')'">
-                    Robot <span th:text="${robot.id}"></span>
-                    <div th:id="${robot.id}" class="robot-details">
-                        <p th:text="'ID: ' + ${robot.id} + ', Category: ' + ${robot.category}"></p>
-                    </div>
-                </li>
-            </ul>
-        </div>
     </div>
+    <div class="sections"></div>
 </body>
 </html>

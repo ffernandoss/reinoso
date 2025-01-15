@@ -7,16 +7,20 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 @Controller
@@ -44,46 +48,44 @@ public class MenuController {
     }
 
     @PostMapping("/menu")
-    public String handleMenuOption(@RequestParam("option") int option, Model model) {
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> handleMenuOption(@RequestParam("option") int option) {
         List<Robot> robots;
+        String category = "";
+        Map<String, Object> response = new HashMap<>();
         switch (option) {
             case 1:
-                robots = getRobots("cortar");
-                model.addAttribute("robots", robots);
-                if (robots.isEmpty()) {
-                    model.addAttribute("noRobotsMessage", "No hay ningún robot registrado para cortar.");
-                }
+                category = "cortar";
+                robots = getRobots(category);
                 break;
             case 2:
-                robots = getRobots("doblar");
-                model.addAttribute("robots", robots);
-                if (robots.isEmpty()) {
-                    model.addAttribute("noRobotsMessage", "No hay ningún robot registrado para doblar.");
-                }
+                category = "doblar";
+                robots = getRobots(category);
                 break;
             case 3:
-                robots = getRobots("apilar");
-                model.addAttribute("robots", robots);
-                if (robots.isEmpty()) {
-                    model.addAttribute("noRobotsMessage", "No hay ningún robot registrado para apilar.");
-                }
+                category = "apilar";
+                robots = getRobots(category);
                 break;
             case 4:
-                robots = getRobots("transportar");
-                model.addAttribute("robots", robots);
-                if (robots.isEmpty()) {
-                    model.addAttribute("noRobotsMessage", "No hay ningún robot registrado para transportar.");
-                }
+                category = "transportar";
+                robots = getRobots(category);
                 break;
             case 5:
                 robotFluxGenerator.stop();
                 SpringApplication.exit(SpringApplication.run(MenuController.class), () -> 0);
                 System.exit(0);
-                break;
+                return null;
             default:
-                model.addAttribute("message", "Opción no válida.");
+                response.put("message", "Opción no válida.");
+                return ResponseEntity.badRequest().body(response);
         }
-        return "menu";
+        if (robots.isEmpty()) {
+            response.put("noRobotsMessage", "No hay ningún robot registrado para " + category + ".");
+        } else {
+            response.put("robots", robots);
+            response.put("category", category);
+        }
+        return ResponseEntity.ok(response);
     }
 
     private List<Robot> getRobots(String category) {
