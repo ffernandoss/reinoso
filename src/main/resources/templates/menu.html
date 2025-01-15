@@ -72,6 +72,16 @@
             border-radius: 5px;
             cursor: pointer;
         }
+        .live-view {
+            display: none;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
     </style>
     <script>
         function toggleDetails(id) {
@@ -167,40 +177,75 @@
         }
 
         function handleMenuOption(option) {
-            let category;
-            switch (option) {
-                case 1:
-                    category = 'cortar';
-                    break;
-                case 2:
-                    category = 'doblar';
-                    break;
-                case 3:
-                    category = 'apilar';
-                    break;
-                case 4:
-                    category = 'transportar';
-                    break;
-                default:
-                    alert('Opción no válida.');
-                    return;
-            }
+    let category;
+    switch (option) {
+        case 1:
+            category = 'cortar';
+            break;
+        case 2:
+            category = 'doblar';
+            break;
+        case 3:
+            category = 'apilar';
+            break;
+        case 4:
+            category = 'transportar';
+            break;
+        case 6:
+            showLiveView();
+            return;
+        default:
+            alert('Opción no válida.');
+            return;
+    }
 
-            if (document.getElementById('section-' + category)) {
-                alert('Ya existe una sección para ' + category);
-                return;
-            }
+    document.querySelector('.live-view').style.display = 'none'; // Ocultar vista en directo
+    document.querySelector('.sections').style.display = 'flex'; // Mostrar secciones
 
-            fetch('/menu?option=' + option, { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.robots && data.robots.length > 0) {
-                        addRobotSection(data.category, data.robots);
-                    } else if (data.noRobotsMessage) {
-                        alert(data.noRobotsMessage);
-                    }
-                });
+    fetch('/menu?option=' + option, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.robots && data.robots.length > 0) {
+                if (document.getElementById('section-' + category)) {
+                    updateRobotSection(data.category, data.robots); // Actualizar sección existente
+                } else {
+                    addRobotSection(data.category, data.robots); // Añadir nueva sección
+                }
+            } else if (data.noRobotsMessage) {
+                alert(data.noRobotsMessage);
+            }
+        });
+}
+
+        function showLiveView() {
+            document.querySelector('.sections').style.display = 'none';
+            document.querySelector('.live-view').style.display = 'block';
+            refreshLiveView();
+            setInterval(refreshLiveView, 5000);
         }
+
+       function refreshLiveView() {
+    fetch('/menu?option=6', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            var liveView = document.querySelector('.live-view');
+            var list = liveView.querySelector('ul');
+            list.innerHTML = '';
+            if (data.robots && data.robots.length > 0) {
+                data.robots.sort((a, b) => a.id - b.id); // Ordenar por ID
+                data.robots.forEach(function(robot) {
+                    var listItem = document.createElement('li');
+                    listItem.textContent = 'Robot ' + robot.id + ' - ' + robot.category;
+                    list.appendChild(listItem);
+                });
+            } else {
+                var message = document.createElement('div');
+                message.className = 'message';
+                message.textContent = 'No hay robots almacenados';
+                liveView.appendChild(message);
+            }
+        });
+}
     </script>
 </head>
 <body>
@@ -213,10 +258,15 @@
                 <option value="3">Apilar</option>
                 <option value="4">Transportar</option>
                 <option value="5">Salir</option>
+                <option value="6">Ver en directo</option>
             </select>
             <button type="submit">Submit</button>
         </form>
     </div>
     <div class="sections"></div>
+    <div class="live-view">
+        <h2>Robots en directo</h2>
+        <ul></ul>
+    </div>
 </body>
 </html>

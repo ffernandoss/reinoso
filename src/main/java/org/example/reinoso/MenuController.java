@@ -50,7 +50,7 @@ public class MenuController {
     @PostMapping("/menu")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> handleMenuOption(@RequestParam("option") int option) {
-        List<Robot> robots;
+        List<Robot> robots = new ArrayList<>();
         String category = "";
         Map<String, Object> response = new HashMap<>();
         switch (option) {
@@ -75,6 +75,9 @@ public class MenuController {
                 SpringApplication.exit(SpringApplication.run(MenuController.class), () -> 0);
                 System.exit(0);
                 return null;
+            case 6:
+                robots = getAllRobots();
+                break;
             default:
                 response.put("message", "Opción no válida.");
                 return ResponseEntity.badRequest().body(response);
@@ -97,5 +100,13 @@ public class MenuController {
         }
         consumer.unsubscribe();
         return robots;
+    }
+
+    private List<Robot> getAllRobots() {
+        List<Robot> allRobots = new ArrayList<>();
+        for (String category : new String[]{"cortar", "doblar", "apilar", "transportar"}) {
+            allRobots.addAll(getRobots(category));
+        }
+        return allRobots;
     }
 }
