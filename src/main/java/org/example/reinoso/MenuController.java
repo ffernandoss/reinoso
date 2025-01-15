@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,14 +71,15 @@ public class MenuController {
                 category = "transportar";
                 robots = getRobots(category);
                 break;
-            case 5:
-                robotFluxGenerator.stop();
-                SpringApplication.exit(SpringApplication.run(MenuController.class), () -> 0);
-                System.exit(0);
-                return null;
             case 6:
                 robots = getAllRobots();
                 break;
+            case 5:
+                robotFluxGenerator.stop();
+                executeDockerComposeDown();
+                SpringApplication.exit(SpringApplication.run(MenuController.class), () -> 0);
+                System.exit(0);
+                return null;
             default:
                 response.put("message", "Opción no válida.");
                 return ResponseEntity.badRequest().body(response);
@@ -89,6 +91,22 @@ public class MenuController {
             response.put("category", category);
         }
         return ResponseEntity.ok(response);
+    }
+    private void executeDockerComposeDown() {
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.command("docker-compose", "down");
+
+        try {
+            Process process = processBuilder.start();
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                System.out.println("docker-compose down executed successfully.");
+            } else {
+                System.out.println("Failed to execute docker-compose down.");
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private List<Robot> getRobots(String category) {

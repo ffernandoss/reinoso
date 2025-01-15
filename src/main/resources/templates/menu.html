@@ -32,13 +32,13 @@
         .robot-section {
             width: 22%;
             padding: 15px;
-            background-color: #e9ecef;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
+            text-align: center;
         }
         .robot-section h2 {
-            color: #007bff;
+            margin-bottom: 10px;
         }
         .message {
             text-align: center;
@@ -55,6 +55,9 @@
             padding: 10px;
             border-radius: 5px;
             cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .robot-details {
             display: none;
@@ -62,11 +65,11 @@
             padding: 5px;
             background-color: #f1f1f1;
             border-radius: 5px;
+            text-align: center;
         }
         .refresh-button {
             margin-top: 10px;
             padding: 5px 10px;
-            background-color: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
@@ -81,6 +84,30 @@
             border-radius: 8px;
             text-align: center;
             margin-bottom: 20px;
+        }
+        .cortar {
+            background-color: #e0f0ff;
+        }
+        .apilar {
+            background-color: #ffe0b3;
+        }
+        .doblar {
+            background-color: #e0e0e0;
+        }
+        .transportar {
+            background-color: #e0ffe0;
+        }
+        .cortar h2, .cortar .refresh-button {
+            color: blue;
+        }
+        .apilar h2, .apilar .refresh-button {
+            color: orange;
+        }
+        .doblar h2, .doblar .refresh-button {
+            color: black;
+        }
+        .transportar h2, .transportar .refresh-button {
+            color: green;
         }
     </style>
     <script>
@@ -136,15 +163,9 @@
                 message.style.display = 'none';
                 robots.forEach(function(robot) {
                     var listItem = document.createElement('li');
-                    listItem.textContent = 'Robot ' + robot.id;
-                    listItem.onclick = function() { toggleDetails('details-' + robot.id); };
-
-                    var details = document.createElement('div');
-                    details.className = 'robot-details';
-                    details.id = 'details-' + robot.id;
-                    details.textContent = 'ID: ' + robot.id + ', Category: ' + robot.category;
-
-                    listItem.appendChild(details);
+                    listItem.className = category;
+                    var imageName = getImageName(category);
+                    listItem.innerHTML = '<div style="display: flex; align-items: center;"><img src="/images/' + imageName + '" alt="' + category + '" style="width:50px;height:50px;margin-right:10px;">' + 'Robot ' + robot.id + '</div>';
                     list.appendChild(listItem);
                 });
             }
@@ -152,7 +173,7 @@
 
         function addRobotSection(category, robots) {
             var section = document.createElement('div');
-            section.className = 'robot-section';
+            section.className = 'robot-section ' + category;
             section.id = 'section-' + category;
 
             var title = document.createElement('h2');
@@ -195,6 +216,9 @@
                     break;
                 case 6:
                     showLiveView();
+                    return;
+                case 5:
+                    exitApplication();
                     return;
                 default:
                     alert('Opción no válida.');
@@ -244,9 +268,44 @@
             list.innerHTML = '';
             existingRobots.forEach(function(robot) {
                 var listItem = document.createElement('li');
-                listItem.textContent = 'Robot ' + robot.id + ' - ' + robot.category;
+                var imageName = getImageName(robot.category);
+                listItem.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center;"><img src="/images/' + imageName + '" alt="' + robot.category + '" style="width:50px;height:50px;margin-bottom:10px;">' + 'Robot ' + robot.id + '</div>';
+                listItem.onclick = function() { toggleDetails('details-' + robot.id); };
+
+                var details = document.createElement('span');
+                details.className = 'robot-details';
+                details.id = 'details-' + robot.id;
+                details.style.display = 'none'; // Hide details by default
+                details.textContent = ' ID: ' + robot.id + ', Category: ' + robot.category;
+
+                listItem.appendChild(details);
                 list.appendChild(listItem);
             });
+        }
+
+        function getImageName(category) {
+            switch (category) {
+                case 'cortar':
+                    return 'RobotAzul.jpeg';
+                case 'apilar':
+                    return 'RobotNaranja.jpeg';
+                case 'doblar':
+                    return 'RobotNegro.jpeg';
+                case 'transportar':
+                    return 'RobotVerde.jpeg';
+                default:
+                    return 'default.jpeg';
+            }
+        }
+
+        function exitApplication() {
+            fetch('/menu?option=5', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                    }
+                });
         }
     </script>
 </head>
@@ -259,8 +318,8 @@
                 <option value="2">Doblar</option>
                 <option value="3">Apilar</option>
                 <option value="4">Transportar</option>
-                <option value="5">Salir</option>
                 <option value="6">Ver en directo</option>
+                <option value="5">Salir</option>
             </select>
             <button type="submit">Submit</button>
         </form>
