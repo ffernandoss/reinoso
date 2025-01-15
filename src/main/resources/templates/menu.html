@@ -30,12 +30,12 @@
             width: 100%;
         }
         .robot-section {
-            width: 23%;
-            padding: 20px;
+            width: 22%;
+            padding: 15px;
             background-color: #e9ecef;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         .robot-section h2 {
             color: #007bff;
@@ -167,6 +167,30 @@
         }
 
         function handleMenuOption(option) {
+            let category;
+            switch (option) {
+                case 1:
+                    category = 'cortar';
+                    break;
+                case 2:
+                    category = 'doblar';
+                    break;
+                case 3:
+                    category = 'apilar';
+                    break;
+                case 4:
+                    category = 'transportar';
+                    break;
+                default:
+                    alert('Opción no válida.');
+                    return;
+            }
+
+            if (document.getElementById('section-' + category)) {
+                alert('Ya existe una sección para ' + category);
+                return;
+            }
+
             fetch('/menu?option=' + option, { method: 'POST' })
                 .then(response => response.json())
                 .then(data => {
@@ -182,7 +206,7 @@
 <body>
     <div class="container">
         <h1>Robot Menu</h1>
-        <form onsubmit="event.preventDefault(); handleMenuOption(document.querySelector('select').value);">
+        <form onsubmit="event.preventDefault(); handleMenuOption(parseInt(document.querySelector('select').value));">
             <select name="option">
                 <option value="1">Cortar</option>
                 <option value="2">Doblar</option>
