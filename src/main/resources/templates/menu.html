@@ -84,6 +84,8 @@
         }
     </style>
     <script>
+        let existingRobots = [];
+
         function toggleDetails(id) {
             var details = document.getElementById(id);
             if (details.style.display === "none") {
@@ -177,45 +179,45 @@
         }
 
         function handleMenuOption(option) {
-    let category;
-    switch (option) {
-        case 1:
-            category = 'cortar';
-            break;
-        case 2:
-            category = 'doblar';
-            break;
-        case 3:
-            category = 'apilar';
-            break;
-        case 4:
-            category = 'transportar';
-            break;
-        case 6:
-            showLiveView();
-            return;
-        default:
-            alert('Opción no válida.');
-            return;
-    }
-
-    document.querySelector('.live-view').style.display = 'none'; // Ocultar vista en directo
-    document.querySelector('.sections').style.display = 'flex'; // Mostrar secciones
-
-    fetch('/menu?option=' + option, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.robots && data.robots.length > 0) {
-                if (document.getElementById('section-' + category)) {
-                    updateRobotSection(data.category, data.robots); // Actualizar sección existente
-                } else {
-                    addRobotSection(data.category, data.robots); // Añadir nueva sección
-                }
-            } else if (data.noRobotsMessage) {
-                alert(data.noRobotsMessage);
+            let category;
+            switch (option) {
+                case 1:
+                    category = 'cortar';
+                    break;
+                case 2:
+                    category = 'doblar';
+                    break;
+                case 3:
+                    category = 'apilar';
+                    break;
+                case 4:
+                    category = 'transportar';
+                    break;
+                case 6:
+                    showLiveView();
+                    return;
+                default:
+                    alert('Opción no válida.');
+                    return;
             }
-        });
-}
+
+            document.querySelector('.live-view').style.display = 'none'; // Ocultar vista en directo
+            document.querySelector('.sections').style.display = 'flex'; // Mostrar secciones
+
+            fetch('/menu?option=' + option, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        if (document.getElementById('section-' + category)) {
+                            updateRobotSection(data.category, data.robots); // Actualizar sección existente
+                        } else {
+                            addRobotSection(data.category, data.robots); // Añadir nueva sección
+                        }
+                    } else if (data.noRobotsMessage) {
+                        alert(data.noRobotsMessage);
+                    }
+                });
+        }
 
         function showLiveView() {
             document.querySelector('.sections').style.display = 'none';
@@ -224,28 +226,28 @@
             setInterval(refreshLiveView, 5000);
         }
 
-       function refreshLiveView() {
-    fetch('/menu?option=6', { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
+        function refreshLiveView() {
+            fetch('/menu?option=6', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        // Actualizar la lista de robots existentes
+                        existingRobots = data.robots.sort((a, b) => a.id - b.id); // Ordenar por ID
+                    }
+                    updateLiveView();
+                });
+        }
+
+        function updateLiveView() {
             var liveView = document.querySelector('.live-view');
             var list = liveView.querySelector('ul');
             list.innerHTML = '';
-            if (data.robots && data.robots.length > 0) {
-                data.robots.sort((a, b) => a.id - b.id); // Ordenar por ID
-                data.robots.forEach(function(robot) {
-                    var listItem = document.createElement('li');
-                    listItem.textContent = 'Robot ' + robot.id + ' - ' + robot.category;
-                    list.appendChild(listItem);
-                });
-            } else {
-                var message = document.createElement('div');
-                message.className = 'message';
-                message.textContent = 'No hay robots almacenados';
-                liveView.appendChild(message);
-            }
-        });
-}
+            existingRobots.forEach(function(robot) {
+                var listItem = document.createElement('li');
+                listItem.textContent = 'Robot ' + robot.id + ' - ' + robot.category;
+                list.appendChild(listItem);
+            });
+        }
     </script>
 </head>
 <body>
