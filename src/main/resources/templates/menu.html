@@ -182,7 +182,7 @@
 
             var refreshButton = document.createElement('button');
             refreshButton.className = 'refresh-button';
-            refreshButton.textContent = 'Refresh';
+            refreshButton.textContent = 'Actualizar';
             refreshButton.onclick = function() { refreshSection(category); };
             section.appendChild(refreshButton);
 
@@ -276,7 +276,7 @@
                 details.className = 'robot-details';
                 details.id = 'details-' + robot.id;
                 details.style.display = 'none'; // Hide details by default
-                details.textContent = ' ID: ' + robot.id + ', Category: ' + robot.category;
+                details.textContent = ' ID: ' + robot.id + ', Categoria: ' + robot.category;
 
                 listItem.appendChild(details);
                 list.appendChild(listItem);
@@ -304,6 +304,9 @@
                 .then(data => {
                     if (data.message) {
                         alert(data.message);
+                        setTimeout(() => {
+                            window.close();
+                        }, 2000);
                     }
                 });
         }
@@ -321,7 +324,7 @@
                 <option value="6">Ver en directo</option>
                 <option value="5">Salir</option>
             </select>
-            <button type="submit">Submit</button>
+            <button type="submit">Confirmar</button>
         </form>
     </div>
     <div class="sections"></div>

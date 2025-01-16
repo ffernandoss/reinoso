@@ -7,9 +7,9 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +29,9 @@ public class MenuController {
 
     @Autowired
     private RobotFluxGenerator robotFluxGenerator;
+
+    @Autowired
+    private ApplicationContext context;
 
     private KafkaConsumer<String, Robot> consumer;
 
@@ -77,9 +80,17 @@ public class MenuController {
             case 5:
                 robotFluxGenerator.stop();
                 executeDockerComposeDown();
-                SpringApplication.exit(SpringApplication.run(MenuController.class), () -> 0);
-                System.exit(0);
-                return null;
+                response.put("message", "El contenedor de Docker ha sido eliminado y el programa se ha detenido.");
+                new Thread(() -> {
+                    try {
+                        Thread.sleep(2000); // Wait for 2 seconds to show the message
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    SpringApplication.exit(context, () -> -1);
+                    System.exit(-1);
+                }).start();
+                return ResponseEntity.ok(response);
             default:
                 response.put("message", "Opción no válida.");
                 return ResponseEntity.badRequest().body(response);
@@ -92,6 +103,7 @@ public class MenuController {
         }
         return ResponseEntity.ok(response);
     }
+
     private void executeDockerComposeDown() {
         ProcessBuilder processBuilder = new ProcessBuilder();
         processBuilder.command("docker-compose", "down");
