@@ -4,16 +4,16 @@ public class Robot {
     private int id;
     private String category;
 
-    // No-argument constructor
+
     public Robot() {}
 
-    // Constructor with parameters
+    //constructor de la clase Robot, con los parametros id (int), para saber que robot es y diferenciarlo del resto y category (string) para saber su tarea encargada
     public Robot(int id, String category) {
         this.id = id;
         this.category = category;
     }
 
-    // Getters and setters
+    //todos los getters y setters de los parametros de la clase Robot, aunque haya algunos que no se usan, al igual que el constructor vacio
     public int getId() {
         return id;
     }
@@ -32,6 +32,6 @@ public class Robot {
 
     @Override
     public String toString() {
-        return "Robot " + id + " - Task: " + category;
+        return "Robot " + id + " - Tarea: " + category;
     }
 }
