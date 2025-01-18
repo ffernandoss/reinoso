@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Menu</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .sections {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .robot-section {
+            width: 22%;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .robot-section h2 {
+            margin-bottom: 10px;
+        }
+        .message {
+            text-align: center;
+            color: #ff0000;
+            font-weight: bold;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f1f1f1;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .robot-details {
+            display: none;
+            margin-top: 5px;
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .refresh-button {
+            margin-top: 10px;
+            padding: 5px 10px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .live-view {
+            display: none;
+            width: 100%;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .cortar {
+            background-color: #e0f0ff;
+        }
+        .apilar {
+            background-color: #ffe0b3;
+        }
+        .doblar {
+            background-color: #e0e0e0;
+        }
+        .transportar {
+            background-color: #e0ffe0;
+        }
+        .cortar h2, .cortar .refresh-button {
+            color: blue;
+        }
+        .apilar h2, .apilar .refresh-button {
+            color: orange;
+        }
+        .doblar h2, .doblar .refresh-button {
+            color: black;
+        }
+        .transportar h2, .transportar .refresh-button {
+            color: green;
+        }
+    </style>
+    <script>
+        let existingRobots = [];
+
+        function toggleDetails(id) {
+            var details = document.getElementById(id);
+            if (details.style.display === "none") {
+                details.style.display = "block";
+            } else {
+                details.style.display = "none";
+            }
+        }
+
+        function refreshSection(category) {
+            let option;
+            switch (category) {
+                case 'cortar':
+                    option = 1;
+                    break;
+                case 'doblar':
+                    option = 2;
+                    break;
+                case 'apilar':
+                    option = 3;
+                    break;
+                case 'transportar':
+                    option = 4;
+                    break;
+                default:
+                    return;
+            }
+
+            fetch('/menu?option=' + option, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        updateRobotSection(data.category, data.robots);
+                    } else if (data.noRobotsMessage) {
+                        alert(data.noRobotsMessage);
+                    }
+                });
+        }
+
+        function updateRobotSection(category, robots) {
+            var section = document.getElementById('section-' + category);
+            var list = section.querySelector('ul');
+            var message = section.querySelector('.message');
+            list.innerHTML = '';
+            if (robots.length === 0) {
+                message.style.display = 'block';
+            } else {
+                message.style.display = 'none';
+                robots.forEach(function(robot) {
+                    var listItem = document.createElement('li');
+                    listItem.className = category;
+                    var imageName = getImageName(category);
+                    listItem.innerHTML = '<div style="display: flex; align-items: center;"><img src="/images/' + imageName + '" alt="' + category + '" style="width:50px;height:50px;margin-right:10px;">' + 'Robot ' + robot.id + '</div>';
+                    list.appendChild(listItem);
+                });
+            }
+        }
+
+        function addRobotSection(category, robots) {
+            var section = document.createElement('div');
+            section.className = 'robot-section ' + category;
+            section.id = 'section-' + category;
+
+            var title = document.createElement('h2');
+            title.textContent = 'Robots for ' + category;
+            section.appendChild(title);
+
+            var refreshButton = document.createElement('button');
+            refreshButton.className = 'refresh-button';
+            refreshButton.textContent = 'Actualizar';
+            refreshButton.onclick = function() { refreshSection(category); };
+            section.appendChild(refreshButton);
+
+            var message = document.createElement('div');
+            message.className = 'message';
+            message.textContent = 'No hay robots almacenados';
+            section.appendChild(message);
+
+            var list = document.createElement('ul');
+            section.appendChild(list);
+
+            document.querySelector('.sections').appendChild(section);
+
+            updateRobotSection(category, robots);
+        }
+
+        function handleMenuOption(option) {
+            let category;
+            switch (option) {
+                case 1:
+                    category = 'cortar';
+                    break;
+                case 2:
+                    category = 'doblar';
+                    break;
+                case 3:
+                    category = 'apilar';
+                    break;
+                case 4:
+                    category = 'transportar';
+                    break;
+                case 6:
+                    showLiveView();
+                    return;
+                case 5:
+                    exitApplication();
+                    return;
+                default:
+                    alert('Opción no válida.');
+                    return;
+            }
+
+            document.querySelector('.live-view').style.display = 'none'; // Ocultar vista en directo
+            document.querySelector('.sections').style.display = 'flex'; // Mostrar secciones
+
+            fetch('/menu?option=' + option, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        if (document.getElementById('section-' + category)) {
+                            updateRobotSection(data.category, data.robots); // Actualizar sección existente
+                        } else {
+                            addRobotSection(data.category, data.robots); // Añadir nueva sección
+                        }
+                    } else if (data.noRobotsMessage) {
+                        alert(data.noRobotsMessage);
+                    }
+                });
+        }
+
+        function showLiveView() {
+            document.querySelector('.sections').style.display = 'none';
+            document.querySelector('.live-view').style.display = 'block';
+            refreshLiveView();
+            setInterval(refreshLiveView, 5000);
+        }
+
+        function refreshLiveView() {
+            fetch('/menu?option=6', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.robots && data.robots.length > 0) {
+                        // Actualizar la lista de robots existentes
+                        existingRobots = data.robots.sort((a, b) => a.id - b.id); // Ordenar por ID
+                    }
+                    updateLiveView();
+                });
+        }
+
+        function updateLiveView() {
+            var liveView = document.querySelector('.live-view');
+            var list = liveView.querySelector('ul');
+            list.innerHTML = '';
+            existingRobots.forEach(function(robot) {
+                var listItem = document.createElement('li');
+                var imageName = getImageName(robot.category);
+                listItem.innerHTML = '<div style="display: flex; flex-direction: column; align-items: center;"><img src="/images/' + imageName + '" alt="' + robot.category + '" style="width:50px;height:50px;margin-bottom:10px;">' + 'Robot ' + robot.id + '</div>';
+                listItem.onclick = function() { toggleDetails('details-' + robot.id); };
+
+                var details = document.createElement('span');
+                details.className = 'robot-details';
+                details.id = 'details-' + robot.id;
+                details.style.display = 'none'; // Hide details by default
+                details.textContent = ' ID: ' + robot.id + ', Categoria: ' + robot.category;
+
+                listItem.appendChild(details);
+                list.appendChild(listItem);
+            });
+        }
+
+        function getImageName(category) {
+            switch (category) {
+                case 'cortar':
+                    return 'RobotAzul.jpeg';
+                case 'apilar':
+                    return 'RobotNaranja.jpeg';
+                case 'doblar':
+                    return 'RobotNegro.jpeg';
+                case 'transportar':
+                    return 'RobotVerde.jpeg';
+                default:
+                    return 'default.jpeg';
+            }
+        }
+
+        function exitApplication() {
+            fetch('/menu?option=5', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+                        setTimeout(() => {
+                            window.close();
+                        }, 2000);
+                    }
+                });
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Robot Menu</h1>
+        <form onsubmit="event.preventDefault(); handleMenuOption(parseInt(document.querySelector('select').value));">
+            <select name="option">
+                <option value="1">Cortar</option>
+                <option value="2">Doblar</option>
+                <option value="3">Apilar</option>
+                <option value="4">Transportar</option>
+                <option value="6">Ver en directo</option>
+                <option value="5">Salir</option>
+            </select>
+            <button type="submit">Confirmar</button>
+        </form>
+    </div>
+    <div class="sections"></div>
+    <div class="live-view">
+        <h2>Robots en directo</h2>
+        <ul></ul>
+    </div>
+</body>
+</html>
